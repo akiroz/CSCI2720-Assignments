@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="UTF-8">
+    <style>
+body {
+  border: 3px double #1600FF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+header {
+  width: 100%;
+}
+h1 {
+  font-size: 1.2rem;
+  margin: 0.5rem;
+}
+article {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  pading: 3px;
+}
+section {
+  background-color: #9BCADA;
+  max-height: 270px;
+  overflow-y: scroll;
+}
+img {
+  height: 250px;
+  margin: 10px;
+}
+button {
+  margin: 0.5rem;
+}
+@media (max-width: 640px) {
+  article {
+    flex-direction: column-reverse;
+  }
+  img {
+    height: auto;
+    width: calc(100% - 10px);
+  }
+  footer {
+    width: 100%;
+    padding: 10px;
+  }
+  button {
+    margin: 1px 6px;
+    width: calc(100% - 12px);
+  }
+}
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>This is the title</h1>
+    </header>
+    <article>
+      <section>
+        <p>
+        This is content and may contain paragraph and any other inline text elements
+        </p>
+        <p>
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        Lorem Ipsum has been the industry's standard dummy text ever since the
+        1500s, when an unknown printer took a galley of type and scrambled it to
+        make a type specimen book. It has survived not only five centuries, but
+        also the leap into electronic typesetting, remaining essentially unchanged.
+        It was popularised in the 1960s with the release of Letraset sheets containing
+        Lorem Ipsum passages, and more recently with desktop publishing software
+        like Aldus PageMaker including versions of Lorem Ipsum.
+        </p>
+      </section>
+      <img src="img/wolf.jpg" alt="">
+    </article>
+    <footer>
+      <button>Button 1</button>
+      <button>Button 2</button>
+      <button>Button 3</button>
+      <button>Button 4</button>
+    </footer>
+  </body>
+</html>
