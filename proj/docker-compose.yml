@@ -1,0 +1,17 @@
+version: '3.1'
+services:
+  srv:
+    image: node:8.6.0
+    volumes:
+      - .:/src
+    working_dir: /src
+    command: npm start
+    ports:
+      - 3000:3000
+    links:
+      - db
+  db:
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ROOT_PASSWORD: 19WindowsSucks
+      MYSQL_DATABASE: CSCI2720

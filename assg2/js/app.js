@@ -2,6 +2,11 @@ var l = console.log.bind(console);
 var q = document.querySelector.bind(document);
 var qa = document.querySelectorAll.bind(document);
 
+function setItemCount() {
+  var c = qa("li").length - qa(".completed").length;
+  q(".todo-count").textContent = `${c} item${(c===0||c>1)?'s':''} left`;
+}
+
 function attachDestroyHandlers() {
   qa(".destroy").forEach(d => {
     d.onclick = e => {
@@ -10,6 +15,7 @@ function attachDestroyHandlers() {
         q(".main").style.display = "none";
         q(".footer").style.display = "none";
       }
+      setItemCount();
     };
   });
 }
@@ -19,8 +25,7 @@ function attachToggleHandlers() {
     t.onchange = _ => {
       var el = t.parentNode.parentNode;
       el.className = el.className === "" ? "completed" : "";
-      var c = qa("li").length - qa(".completed").length;
-      q(".todo-count > strong").textContent = c
+      setItemCount();
     };
   });
 }
@@ -55,8 +60,7 @@ q(".toggle-all").onclick = e => {
     var el = t.parentNode.parentNode;
     el.className = e.target.checked ? "completed" : "";
     t.checked = e.target.checked;
-    var c = qa("li").length - qa(".completed").length;
-    q(".todo-count > strong").textContent = c
+    setItemCount();
   })
 };
 
@@ -69,7 +73,7 @@ q(".clear-completed").onclick = _ => {
 };
 
 q(".new-todo").onkeypress = e => {
-  var t = e.target.value;
+  var t = e.target.value.trim();
   if(e.keyCode === 13 && t) {
     e.target.value = "";
     q(".main").style.display = "block";
@@ -85,8 +89,7 @@ q(".new-todo").onkeypress = e => {
         <input class="edit" value="${t}">
       </li>
     `);
-    var c = qa("li").length - qa(".completed").length;
-    q(".todo-count > strong").textContent = c
+    setItemCount();
     attachDestroyHandlers();
     attachToggleHandlers();
     attachEditHandlers();
