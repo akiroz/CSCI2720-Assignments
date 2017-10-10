@@ -1,0 +1,21 @@
+body {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  height: 3rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+main {
+  height: calc(100% - 3rem);
+}
+#nav { list-style-type: none; }
+#nav li { float: left; }
+#nav li:not(:first-child)::before {
+  content: "/ ";
+  margin-left: 0.3rem;
+}
