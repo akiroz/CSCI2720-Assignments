@@ -15,10 +15,38 @@
         <li>admin</li>
       </ul>
     </header>
-    <main class="_m0" grid="column center justify-center">
-      <div class="spinner"></div>
+    <main class="_m0 _ps" grid="column center">
+      <form action="/item" method="post">
+        <fieldset>
+          <legend>Add Item</legend>
+          <div grid class="_m0">
+            <input column="6" type="text" placeholder="Title" name="title">
+            <input column="3" type="number" placeholder="Item Cost" name="value" step="1">
+            <input column="3" type="number" placeholder="Available Qty" name="qty" step="1">
+          </div>
+          <input type="text" placeholder="Description" name="description">
+          <input type="text" placeholder="Space-Separated Tags" name="tags">
+          <label class="_mtxs upload-button">
+            Upload Image: <span>None</span>
+            <input style="display:none" type="file" name="image" accept="image/png, image/jpeg">
+          </label>
+          <br>
+          <input class="_mtxs" type="submit" value="Add">
+        </fieldset>
+      </form>
+      <section id="item-list">
+        <div class="spinner"></div>
+      </section>
     </main>
     <script>
+      fetch('/item').then(r => r.json()).then(items => {
+        document.querySelector('#item-list').innerHTML = `
+
+        `;
+      });
+      document.querySelector('.upload-button > input').onchange = e => {
+        document.querySelector('.upload-button > span').textContent = e.target.files[0].name;
+      }
     </script>
   </body>
 </html>

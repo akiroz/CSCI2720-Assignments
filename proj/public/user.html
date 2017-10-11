@@ -19,10 +19,10 @@
     <main class="_m0" grid="column center justify-center">
       <div class="spinner"></div>
     </main>
+    <script src="https://cdn.rawgit.com/js-cookie/js-cookie/82860ea5/src/js.cookie.js"></script>
     <script>
-      var qs = new URLSearchParams(location.search);
-      document.querySelector('#username').textContent = qs.get('username');
-      document.querySelector('#balance').textContent = qs.get('balance');
+      document.querySelector('#username').textContent = Cookies.get('username');
+      document.querySelector('#balance').textContent = Cookies.get('balance');
     </script>
   </body>
 </html>

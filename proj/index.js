@@ -18,7 +18,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// handle login
+// login handler ==============================================
 app.post('/login', (req, res) => {
   var username = req.body.username;
   var pHash = crypto.createHash('sha256');
@@ -36,11 +36,9 @@ app.post('/login', (req, res) => {
           res.redirect('/admin.html');
         } else {
           // login as normal user
-          var qs = querystring.stringify({
-            username,
-            balance: results[0].balance
-          });
-          res.redirect(`/user.html?${qs}`);
+          res.cookie('username', username);
+          res.cookie('balance', results[0].balance);
+          res.redirect('/user.html');
         }
       } else {
         // login failed
@@ -53,6 +51,56 @@ app.post('/login', (req, res) => {
     }
   );
 });
+
+// item CRUD handlers ==============================================
+app.post('/item', (req, res) => {
+  // Create item
+  var { title, description, image, value, qty, tags } = req.body;
+  db.query(
+    `INSERT INTO item (title,description,image,value,qty,tags) VALUES (?,?,?,?,?,?)`,
+    [ title, description, image, value, qty, tags.split(' ') ],
+    err => {
+      if(err) throw err;
+      res.end();
+    }
+  );
+});
+app.get('/item', (req, res) => {
+  // Retreve item
+  var { sortDesc, sortValue, page = 0 } = req.body;
+  var sortField = sortValue ? 'value' : 'create_time';
+  var sortOrder = sortDesc ? 'DESC' : 'ASC';
+  db.query(
+    `SELECT * FROM item ORDER BY ${sortField} ${sortOrder} LIMIT 10 OFFSET ?`,
+    [ page*10 ],
+    (err, results) => {
+      if(err) throw err;
+      res.json(results);
+    }
+  )
+});
+app.put('/item/:id', (req, res) => {
+  var { id } = req.param;
+  var { title, description, image, value, qty, tags } = req.body;
+  // Update item
+  db.query(
+    'UPDATE item SET title=? description=? image=? value=? qty=? tags=? WHERE id=?',
+    [ title, description, image, value, qty, tags, id ],
+    err => {
+      if(err) throw err;
+      res.end();
+    }
+  );
+});
+app.delete('/item/:id', (req, res) => {
+  // Delete item
+  var { id } = req.param;
+  db.query('DELETE FROM item WHERE id=?', [id], err => {
+    if(err) throw err;
+    res.end();
+  });
+});
+
 
 // serve static files from public folder
 app.use(express.static('public'))
@@ -74,9 +122,12 @@ var initSQL = `
     balance   INT
   );
   CREATE TABLE IF NOT EXISTS redeem (
-    username  VARCHAR(64) PRIMARY KEY,
-    password  TEXT,
-    balance   INT
+    id          INT PRIMARY KEY AUTO_INCREMENT,
+    username    VARCHAR(64),
+    item_id     INT,
+    redeem_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (username) REFERENCES user(username),
+    FOREIGN KEY (item_id) REFERENCES item(id)
   );
   INSERT INTO user VALUES (
     'admin',
@@ -91,12 +142,12 @@ var initSQL = `
 `;
 
 // init DB and start HTTP server
-// delay 1s for db startup
+// delay 1.5s for db startup
 setTimeout(_ => {
   db.query(initSQL, err => {
     if(err) throw err;
     app.listen(3000, _ => console.log("Server started on port 3000"));
   });
-}, 2000);
+}, 1500);
 
 
