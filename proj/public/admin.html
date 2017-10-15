@@ -15,10 +15,10 @@
         <li>admin</li>
       </ul>
     </header>
-    <main class="_m0 _ps" grid="column center">
-      <form action="/item" method="post">
-        <fieldset>
-          <legend>Add Item</legend>
+    <main class="_m0 _ps" grid="column center" container>
+      <fieldset style="width:100%">
+        <legend>Add Item</legend>
+        <form action="/item" method="post" enctype="multipart/form-data">
           <div grid class="_m0">
             <input column="6" type="text" placeholder="Title" name="title">
             <input column="3" type="number" placeholder="Item Cost" name="value" step="1">
@@ -32,17 +32,46 @@
           </label>
           <br>
           <input class="_mtxs" type="submit" value="Add">
-        </fieldset>
-      </form>
-      <section id="item-list">
+        </form>
+      </fieldset>
+      <section id="item-list" style="width:100%">
         <div class="spinner"></div>
       </section>
+      <br>
+      <br>
     </main>
     <script>
       fetch('/item').then(r => r.json()).then(items => {
-        document.querySelector('#item-list').innerHTML = `
-
+        var itemRows = items.map(({id, title, value, qty, create_time}) => `
+          <tr data-id=${id}>
+            <td>${title}</td>
+            <td>${value}</td>
+            <td>${qty}</td>
+            <td>${create_time}</td>
+          </tr>
+        `);
+        var noItems = `
+          <tr>
+            <td colspan=4>No Items</td>
+          </tr>
         `;
+        document.querySelector('.spinner').remove();
+        document.querySelector('#item-list').insertAdjacentHTML(
+          'beforeend', `
+          <table style="width:100%">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Value</th>
+                <th>Qty</th>
+                <th>Creation Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemRows.length ? itemRows.join('') : noItems}
+            </tbody>
+          </table>
+        `);
       });
       document.querySelector('.upload-button > input').onchange = e => {
         document.querySelector('.upload-button > span').textContent = e.target.files[0].name;

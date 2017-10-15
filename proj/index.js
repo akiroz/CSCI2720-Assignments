@@ -3,6 +3,7 @@ var querystring = require('querystring');
 var mysql = require('mysql');
 var express = require('express');
 var bodyParser = require('body-parser');
+var fileUpload = require('express-fileupload');
 
 // config database
 var db = mysql.createConnection({
@@ -17,6 +18,7 @@ var db = mysql.createConnection({
 var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(fileUpload());
 
 // login handler ==============================================
 app.post('/login', (req, res) => {
@@ -55,29 +57,47 @@ app.post('/login', (req, res) => {
 // item CRUD handlers ==============================================
 app.post('/item', (req, res) => {
   // Create item
-  var { title, description, image, value, qty, tags } = req.body;
+  var { title, description, value, qty, tags } = req.body;
+  var {
+    image: {
+      data: imageData = null
+    } = {}
+  } = req.files || {};
+  var tagStr = JSON.stringify(tags.split(' '));
   db.query(
-    `INSERT INTO item (title,description,image,value,qty,tags) VALUES (?,?,?,?,?,?)`,
-    [ title, description, image, value, qty, tags.split(' ') ],
+    `INSERT INTO item (title, description, image, value, qty, tags) VALUES (?,?,?,?,?,?)`,
+    [ title, description, imageData, value, qty, tagStr ],
     err => {
       if(err) throw err;
-      res.end();
+      // redirect back to previous page
+      res.redirect(req.get('Referer'));
     }
   );
 });
 app.get('/item', (req, res) => {
-  // Retreve item
-  var { sortDesc, sortValue, page = 0 } = req.body;
+  // Retreve item list
+  var { sortDesc, sortValue, page = 0 } = req.query;
   var sortField = sortValue ? 'value' : 'create_time';
   var sortOrder = sortDesc ? 'DESC' : 'ASC';
   db.query(
-    `SELECT * FROM item ORDER BY ${sortField} ${sortOrder} LIMIT 10 OFFSET ?`,
+    `SELECT id, title, value, qty, create_time FROM item ORDER BY ${sortField} ${sortOrder} LIMIT 10 OFFSET ?`,
     [ page*10 ],
     (err, results) => {
       if(err) throw err;
       res.json(results);
     }
   )
+});
+app.get('/item/:id', (req, res) => {
+  var { id } = req.param;
+  // Retreve item
+  db.query(
+    'SELECT * FROM item WHERE id = ?', [ id ],
+    (err, [item]) => {
+      if(err) throw err;
+      res.json(item);
+    }
+  );
 });
 app.put('/item/:id', (req, res) => {
   var { id } = req.param;
@@ -110,10 +130,10 @@ var initSQL = `
     id          INT PRIMARY KEY AUTO_INCREMENT,
     title       TEXT,
     description TEXT,
-    image       BLOB,
+    image       LONGBLOB, ${/* 4GiB Max */''}
     value       INT,
     qty         INT,
-    tags        JSON,
+    tags        TEXT, ${/* JSON array */''}
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
   CREATE TABLE IF NOT EXISTS user (
@@ -130,24 +150,29 @@ var initSQL = `
     FOREIGN KEY (item_id) REFERENCES item(id)
   );
   INSERT INTO user VALUES (
-    'admin',
+    'admin', ${/* password: admin */''}
     '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918',
     0
   ) ON DUPLICATE KEY UPDATE username=username;
   INSERT INTO user VALUES (
-    'user',
+    'bob', ${/* password: user */''}
     '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
     100
+  ) ON DUPLICATE KEY UPDATE username=username;
+  INSERT INTO user VALUES (
+    'alice', ${/* password: user */''}
+    '04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb',
+    200
   ) ON DUPLICATE KEY UPDATE username=username;
 `;
 
 // init DB and start HTTP server
-// delay 1.5s for db startup
+// delay 1s for db startup
 setTimeout(_ => {
   db.query(initSQL, err => {
     if(err) throw err;
-    app.listen(3000, _ => console.log("Server started on port 3000"));
+    app.listen(3000, _ => console.log("Server started: http://localhost:3000"));
   });
-}, 1500);
+}, 1000);
 
 
