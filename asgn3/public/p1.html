@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Assignment #3 Problem 1</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+
+<body>
+  <h2>Problem #1</h2>
+
+<input id="search" placeholder="Enter keyword here"></input>
+<br>
+
+<h3>List of Persons</h3>
+<ul id="mylist">
+</ul>
+
+</body>
+</html>
+
+<script>
+ // Write your script here. Using jQuery is optional even though it is
+ // highly recommended.
+function fetchPersons({target: {value}}) {
+  var prefix = value ? encodeURIComponent(value) : '';
+  fetch(`/services/p1?prefix=${prefix}`).then(r => r.json()).then(persons => {
+    document.querySelector('#mylist').innerHTML = persons.map(p => `
+      <li>${p.name} (${p.age}): ${p.eyeColor}</li>
+    `).join('');
+  });
+}
+
+window.onload = fetchPersons;
+document.querySelector('#search').oninput = fetchPersons;
+ 
+</script>

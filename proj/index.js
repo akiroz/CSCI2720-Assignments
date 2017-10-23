@@ -4,6 +4,7 @@ var mysql = require('mysql');
 var express = require('express');
 var bodyParser = require('body-parser');
 var fileUpload = require('express-fileupload');
+var csvStringify = require('csv-stringify');
 
 // config database
 var db = mysql.createConnection({
@@ -20,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(fileUpload());
 
-// login handler ==============================================
+// Login ==============================================
 app.post('/login', (req, res) => {
   var username = req.body.username;
   var pHash = crypto.createHash('sha256');
@@ -54,9 +55,8 @@ app.post('/login', (req, res) => {
   );
 });
 
-// item CRUD handlers ==============================================
+// Create Item ==============================================
 app.post('/item', (req, res) => {
-  // Create item
   var { title, description, value, qty, tags } = req.body;
   var {
     image: {
@@ -74,8 +74,8 @@ app.post('/item', (req, res) => {
     }
   );
 });
+// Retreve Item List ==============================================
 app.get('/item', (req, res) => {
-  // Retreve item list
   var { sortDesc, sortValue, page = 0 } = req.query;
   var sortField = sortValue ? 'value' : 'create_time';
   var sortOrder = sortDesc ? 'DESC' : 'ASC';
@@ -88,9 +88,9 @@ app.get('/item', (req, res) => {
     }
   )
 });
+// Retreve Item ==============================================
 app.get('/item/:id', (req, res) => {
   var { id } = req.param;
-  // Retreve item
   db.query(
     'SELECT * FROM item WHERE id = ?', [ id ],
     (err, [item]) => {
@@ -99,10 +99,10 @@ app.get('/item/:id', (req, res) => {
     }
   );
 });
+// Update Item ==============================================
 app.put('/item/:id', (req, res) => {
   var { id } = req.param;
   var { title, description, image, value, qty, tags } = req.body;
-  // Update item
   db.query(
     'UPDATE item SET title=? description=? image=? value=? qty=? tags=? WHERE id=?',
     [ title, description, image, value, qty, tags, id ],
@@ -112,15 +112,14 @@ app.put('/item/:id', (req, res) => {
     }
   );
 });
+// Delete Item ==============================================
 app.delete('/item/:id', (req, res) => {
-  // Delete item
   var { id } = req.param;
   db.query('DELETE FROM item WHERE id=?', [id], err => {
     if(err) throw err;
     res.end();
   });
 });
-
 
 // serve static files from public folder
 app.use(express.static('public'))
